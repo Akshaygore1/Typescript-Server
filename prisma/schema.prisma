@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  slug      String   @unique
+  links     Link[]
+  profile   Profile?
+  themeId   Int?
+  theme     Theme?   @relation(fields: [themeId], references: [id])
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  bio       String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Link {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  url       String
+  title     String
+  clicks    Int      @default(0)
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  Click     Click[]
+}
+
+model Click {
+  id        Int      @id @default(autoincrement())
+  linkId    Int
+  timestamp DateTime @default(now())
+  ipAddress String
+  userAgent String
+  link      Link     @relation(fields: [linkId], references: [id])
+}
+
+model Theme {
+  id        Int      @id @default(autoincrement())
+  name      String
+  meta      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User[]
+}
